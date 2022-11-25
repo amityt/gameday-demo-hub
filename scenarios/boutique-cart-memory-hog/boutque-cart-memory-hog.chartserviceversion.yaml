@@ -1,0 +1,32 @@
+apiVersion: litmuchaos.io/v1alpha1
+kind: ChartServiceVersion
+metadata:
+  name:
+  version: 0.1.0
+  annotations:
+    categories: boutque-cart-memory-hog
+    chartDescription: This chaos scenario comprises of one chaos experiment that injects a pod-memory-hog chaos on boutique app cart service which is identified with "app=cartservice" applabel.
+spec:
+  displayName: boutque-cart-memory-hog
+  categoryDescription: >
+    This chaos scenario comprises of one chaos experiment that injects a pod-memory-hog chaos on boutique app cart service which is identified with "app=cartservice" applabel.
+  experiments:
+    - name: pod-memory-hog
+      description: This chaos scenario comprises of one chaos experiment that injects a pod-memory-hog chaos on boutique app cart service which is identified with "app=cartservice" applabel.
+  keywords:
+    - Kubernetes
+  platforms:
+    - "Minikube"
+  maintainers:
+    - name: Harness.io
+      email: amit.das@harness.io
+  provider:
+    name: Harness
+  links:
+    - name: Kubernetes Slack
+      url: https://slack.kubernetes.io/
+    - name: Documentation
+      url: https://docs.litmuschaos.io/docs/chaoshub/#generic-chaos
+  icon:
+    - url:
+      mediatype: ""
