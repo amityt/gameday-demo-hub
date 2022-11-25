@@ -201,7 +201,7 @@ spec:
                   generateName: pod-memory-hog-vef
                   labels:
                     workflow_run_id: "{{workflow.uid}}"
-                    workflow_name: alert-trigger
+                    workflow_name: "{{workflow.name}}"
                 spec:
                   engineState: active
                   appinfo:
@@ -284,7 +284,7 @@ spec:
           - -saveName=/tmp/engine-name
     - name: alert-notify
       container:
-        image: amitkrdas/trigger-alert:latest
+        image: amitkrdas/trigger-alert:v2
         env:
           - name: EXPERIMENT_RUN_ID
             value: "{{workflow.uid}}"
