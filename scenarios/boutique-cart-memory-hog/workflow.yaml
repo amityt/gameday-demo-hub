@@ -225,24 +225,6 @@ spec:
                             - name: SOCKET_PATH
                               value: /run/containerd/containerd.sock
                         probe:
-                          - name: http-probe
-                            type: httpProbe
-                            mode: Continuous
-                            runProperties:
-                              probeTimeout: 2000
-                              retry: 1
-                              interval: 2
-                              probePollingInterval: 1
-                              initialDelaySeconds: 1
-                              stopOnFailure: false
-                            httpProbe/inputs:
-                              url: http://frontend.boutique.svc.cluster.local:80/cart
-                              insecureSkipVerify: false
-                              responseTimeout: 2000
-                              method:
-                                get:
-                                  criteria: ==
-                                  responseCode: "200"
                           - name: prom-probe
                             type: promProbe
                             mode: Edge
@@ -259,23 +241,6 @@ spec:
                                 type: float
                                 criteria: <=
                                 value: "50"
-                          - name: cmd-probe
-                            type: cmdProbe
-                            mode: Edge
-                            runProperties:
-                              probeTimeout: 5
-                              retry: 2
-                              interval: 2
-                              initialDelaySeconds: 1
-                              stopOnFailure: false
-                            cmdProbe/inputs:
-                              comparator:
-                                type: string
-                                criteria: equal
-                                value: Running
-                              source:
-                                image: chaosnative/k8s:2.13.0
-                              command: status=$(kubectl get pod -l app=cartservice -n boutique -o=jsonpath='{.items[0].status.phase}') && echo $status
       container:
         name: ""
         image: chaosnative/litmus-checker:2.13.0
