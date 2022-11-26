@@ -1,37 +1,43 @@
-kind: Workflow
 apiVersion: argoproj.io/v1alpha1
+kind: Workflow
 metadata:
-  name: boutique-cart-memory-hog
+  name: boutique-cart-network-loss
   namespace: litmus
-  creationTimestamp: null
 spec:
+  arguments:
+    parameters:
+      - name: adminModeNamespace
+        value: litmus
+  entrypoint: custom-chaos
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+  serviceAccountName: argo-chaos
   templates:
     - name: custom-chaos
       steps:
         - - name: install-chaos-experiments
             template: install-chaos-experiments
-        - - name: pod-memory-hog-vef
-            template: pod-memory-hog-vef
-        - - name: alert-notify
-            template: alert-notify
+        - - name: pod-network-loss-sqn
+            template: pod-network-loss-sqn
     - name: install-chaos-experiments
       inputs:
         artifacts:
-          - name: pod-memory-hog-vef
-            path: /tmp/pod-memory-hog-vef.yaml
+          - name: pod-network-loss-sqn
+            path: /tmp/pod-network-loss-sqn.yaml
             raw:
               data: >
                 apiVersion: litmuschaos.io/v1alpha1
 
                 description:
                   message: |
-                    Injects memory consumption on pods belonging to an app deployment
+                    Injects network packet loss on pods belonging to an app deployment
                 kind: ChaosExperiment
 
                 metadata:
-                  name: pod-memory-hog
+                  name: pod-network-loss
                   labels:
-                    name: pod-memory-hog
+                    name: pod-network-loss
                     app.kubernetes.io/part-of: litmus
                     app.kubernetes.io/component: chaosexperiment
                     app.kubernetes.io/version: 2.13.0
@@ -142,63 +148,68 @@ spec:
                     imagePullPolicy: Always
                     args:
                       - -c
-                      - ./experiments -name pod-memory-hog
+                      - ./experiments -name pod-network-loss
                     command:
                       - /bin/bash
                     env:
+                      - name: TARGET_CONTAINER
+                        value: ""
+                      - name: LIB_IMAGE
+                        value: chaosnative/go-runner:2.13.0
+                      - name: NETWORK_INTERFACE
+                        value: eth0
+                      - name: TC_IMAGE
+                        value: gaiadocker/iproute2
+                      - name: NETWORK_PACKET_LOSS_PERCENTAGE
+                        value: "100"
                       - name: TOTAL_CHAOS_DURATION
                         value: "60"
-                      - name: MEMORY_CONSUMPTION
-                        value: "500"
-                      - name: NUMBER_OF_WORKERS
-                        value: "1"
-                      - name: PODS_AFFECTED_PERC
-                        value: ""
                       - name: RAMP_TIME
                         value: ""
                       - name: LIB
                         value: litmus
-                      - name: LIB_IMAGE
-                        value: chaosnative/go-runner:2.13.0
-                      - name: STRESS_IMAGE
-                        value: alexeiled/stress-ng:latest-ubuntu
-                      - name: CONTAINER_RUNTIME
-                        value: docker
-                      - name: SOCKET_PATH
-                        value: /var/run/docker.sock
-                      - name: SEQUENCE
-                        value: parallel
+                      - name: PODS_AFFECTED_PERC
+                        value: ""
                       - name: TARGET_PODS
                         value: ""
                       - name: NODE_LABEL
                         value: ""
+                      - name: CONTAINER_RUNTIME
+                        value: docker
+                      - name: DESTINATION_IPS
+                        value: ""
+                      - name: DESTINATION_HOSTS
+                        value: ""
+                      - name: SOCKET_PATH
+                        value: /var/run/docker.sock
+                      - name: SEQUENCE
+                        value: parallel
                     labels:
-                      name: pod-memory-hog
+                      name: pod-network-loss
                       app.kubernetes.io/part-of: litmus
                       app.kubernetes.io/component: experiment-job
                       app.kubernetes.io/runtime-api-usage: "true"
                       app.kubernetes.io/version: 2.13.0
       container:
-        name: ""
-        image: chaosnative/k8s:2.13.0
+        args:
+          - kubectl apply -f /tmp/pod-network-loss-sqn.yaml -n
+            {{workflow.parameters.adminModeNamespace}} &&  sleep 30
         command:
           - sh
           - -c
-        args:
-          - kubectl apply -f /tmp/pod-memory-hog-vef.yaml -n
-            {{workflow.parameters.adminModeNamespace}} &&  sleep 30
-    - name: pod-memory-hog-vef
+        image: chaosnative/k8s:2.13.0
+    - name: pod-network-loss-sqn
       inputs:
         artifacts:
-          - name: pod-memory-hog-vef
-            path: /tmp/chaosengine-pod-memory-hog-vef.yaml
+          - name: pod-network-loss-sqn
+            path: /tmp/chaosengine-pod-network-loss-sqn.yaml
             raw:
               data: |
                 apiVersion: litmuschaos.io/v1alpha1
                 kind: ChaosEngine
                 metadata:
                   namespace: "{{workflow.parameters.adminModeNamespace}}"
-                  generateName: pod-memory-hog-vef
+                  generateName: pod-network-loss-sqn
                   labels:
                     workflow_run_id: "{{workflow.uid}}"
                     workflow_name: "{{workflow.name}}"
@@ -210,20 +221,20 @@ spec:
                     appkind: deployment
                   chaosServiceAccount: litmus-admin
                   experiments:
-                    - name: pod-memory-hog
+                    - name: pod-network-loss
                       spec:
                         components:
                           env:
                             - name: TOTAL_CHAOS_DURATION
                               value: "60"
-                            - name: MEMORY_CONSUMPTION
-                              value: "490"
-                            - name: PODS_AFFECTED_PERC
+                            - name: NETWORK_PACKET_LOSS_PERCENTAGE
                               value: "100"
                             - name: CONTAINER_RUNTIME
                               value: containerd
                             - name: SOCKET_PATH
                               value: /run/containerd/containerd.sock
+                            - name: PODS_AFFECTED_PERC
+                              value: "100"
                         probe:
                           - name: http-probe
                             type: httpProbe
@@ -277,11 +288,10 @@ spec:
                                 image: chaosnative/k8s:2.13.0
                               command: status=$(kubectl get pod -l app=cartservice -n boutique -o=jsonpath='{.items[0].status.phase}') && echo $status
       container:
-        name: ""
-        image: chaosnative/litmus-checker:2.13.0
         args:
-          - -file=/tmp/chaosengine-pod-memory-hog-vef.yaml
+          - -file=/tmp/chaosengine-pod-network-loss-sqn.yaml
           - -saveName=/tmp/engine-name
+        image: chaosnative/litmus-checker:2.13.0
     - name: alert-notify
       container:
         image: amitkrdas/trigger-alert:v2
@@ -309,15 +319,6 @@ spec:
                 key: SLACK_URL
       securityContext:
         runAsUser: 0
-  entrypoint: custom-chaos
-  arguments:
-    parameters:
-      - name: adminModeNamespace
-        value: litmus
-  serviceAccountName: argo-chaos
-  securityContext:
-    runAsUser: 1000
-    runAsNonRoot: true
 status:
   startedAt:
   finishedAt:
