@@ -20,6 +20,8 @@ spec:
             template: install-chaos-experiments
         - - name: pod-network-loss-sqn
             template: pod-network-loss-sqn
+        - - name: alert-notify
+            template: alert-notify
     - name: install-chaos-experiments
       inputs:
         artifacts:
