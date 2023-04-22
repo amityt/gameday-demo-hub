@@ -10,7 +10,7 @@ spec:
   displayName: boutque-cart-memory-hog
   categoryDescription: >
     This chaos scenario comprises of one chaos experiment that injects a pod-memory-hog chaos on boutique app cart service which is identified with "app=cartservice" applabel.
-  experiments:
+  faults:
     - name: pod-memory-hog
       description: This chaos scenario comprises of one chaos experiment that injects a pod-memory-hog chaos on boutique app cart service which is identified with "app=cartservice" applabel.
   keywords:
