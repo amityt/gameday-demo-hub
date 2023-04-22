@@ -10,7 +10,7 @@ spec:
   displayName: boutique-cart-network-loss
   categoryDescription: >
     This chaos scenario comprises of one chaos experiment that injects a pod-network-loss chaos on boutique app cart service which is identified with "app=cartservice" applabel.
-  experiments:
+  faults:
     - name: pod-network-loss
       description: This chaos scenario comprises of one chaos experiment that injects a pod-network-loss chaos on boutique app cart service which is identified with "app=cartservice" applabel.
   keywords:
