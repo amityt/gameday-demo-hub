@@ -262,6 +262,7 @@ spec:
     - name: alert-notify
       container:
         image: saranyaj/trigger-alert:v1
+        imagePullPolicy: Always
         env:
           - name: EXPERIMENT_RUN_ID
             value: "{{workflow.uid}}"
