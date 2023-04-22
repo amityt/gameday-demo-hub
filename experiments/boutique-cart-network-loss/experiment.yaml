@@ -261,7 +261,7 @@ spec:
         image: chaosnative/litmus-checker:2.13.0
     - name: alert-notify
       container:
-        image: amitkrdas/trigger-alert:latest
+        image: saranyaj/trigger-alert:v1
         env:
           - name: EXPERIMENT_RUN_ID
             value: "{{workflow.uid}}"
