@@ -146,7 +146,7 @@ spec:
                           - patch
                           - update
                           - delete
-                    image: chaosnative/go-runner:3.0.2-saas
+                    image: chaosnative/go-runner:3.0.3-saas
                     imagePullPolicy: Always
                     args:
                       - -c
@@ -157,7 +157,7 @@ spec:
                       - name: TARGET_CONTAINER
                         value: ""
                       - name: LIB_IMAGE
-                        value: chaosnative/go-runner:3.0.2-saas
+                        value: chaosnative/go-runner:3.0.3-saas
                       - name: NETWORK_INTERFACE
                         value: eth0
                       - name: TC_IMAGE
@@ -186,6 +186,8 @@ spec:
                         value: /var/run/docker.sock
                       - name: SEQUENCE
                         value: parallel
+                      - name: DEFAULT_HEALTH_CHECK
+                        value: "false"
                     labels:
                       name: pod-network-loss
                       app.kubernetes.io/part-of: litmus
@@ -238,6 +240,23 @@ spec:
                             - name: PODS_AFFECTED_PERC
                               value: "100"
                         probe:
+                          - name: healthcheck
+                            type: cmdProbe
+                            mode: Edge
+                            runProperties:
+                              probeTimeout: 180
+                              retry: 0
+                              interval: 1
+                              stopOnFailure: true
+                            cmdProbe/inputs:
+                              command: ./healthcheck -name pod-level
+                              source:
+                                image: chaosnative/go-runner:3.0.3-saas
+                                inheritInputs: true
+                              comparator:
+                                type: string
+                                criteria: contains
+                                value: "[P000]"
                           - name: prom-probe
                             type: promProbe
                             mode: Edge
