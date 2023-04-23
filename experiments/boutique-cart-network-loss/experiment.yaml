@@ -146,7 +146,7 @@ spec:
                           - patch
                           - update
                           - delete
-                    image: chaosnative/go-runner:2.13.0
+                    image: chaosnative/go-runner:3.0.2-saas
                     imagePullPolicy: Always
                     args:
                       - -c
@@ -157,7 +157,7 @@ spec:
                       - name: TARGET_CONTAINER
                         value: ""
                       - name: LIB_IMAGE
-                        value: chaosnative/go-runner:2.13.0
+                        value: chaosnative/go-runner:3.0.2-saas
                       - name: NETWORK_INTERFACE
                         value: eth0
                       - name: TC_IMAGE
