@@ -267,7 +267,7 @@ spec:
                               initialDelaySeconds: 1
                               stopOnFailure: false
                             promProbe/inputs:
-                              endpoint: http://34.122.243.8:9090
+                              endpoint: http://35.223.56.74:9090
                               query: avg_over_time(probe_duration_seconds{job=\"prometheus-blackbox-exporter\",instance=\"frontend.boutique.svc.cluster.local:80\"}[60s:1s])*1000
                               comparator:
                                 type: float
