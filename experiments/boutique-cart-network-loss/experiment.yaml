@@ -287,18 +287,6 @@ spec:
             value: "{{workflow.uid}}"
           - name: NAMESPACE
             value: "{{workflow.parameters.adminModeNamespace}}"
-          - name: JIRA_URL
-            value: hce-gameday.atlassian.net
-          - name: JIRA_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: chaos-alert-secret
-                key: JIRA_USERNAME
-          - name: JIRA_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: chaos-alert-secret
-                key: JIRA_PASSWORD
           - name: SLACK_URL
             valueFrom:
               secretKeyRef:
